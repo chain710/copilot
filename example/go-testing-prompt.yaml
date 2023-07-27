@@ -1,0 +1,59 @@
+temperature: 0.4 # temperature = 0 can sometimes get stuck in repetitive loops, so we use 0.4
+top_p: 0.95
+max_tokens: 1024
+messages:
+  - name: explain_system
+    role: system
+    content: You are a world-class Go developer with an eagle eye for unintended bugs and edge cases. You carefully explain code with great detail and accuracy. You organize your explanations in markdown-formatted, bulleted lists.
+  - name: explain_user
+    role: user
+    content: |
+      Please explain the following Go function. Review what each element of the function is doing precisely and what the author's intentions may have been. Organize your explanation as a markdown-formatted, bulleted list.
+
+      ```go
+      {{ .CodeContent }}
+      ```
+  - name: plan_user
+    role: user
+    content: |
+      A good unit test suite should aim to:
+      - Test the function's behavior for a wide range of possible inputs
+      - Test edge cases that the author may not have foreseen
+      - Use table driven test style to make the tests easy to write and maintain
+      - Be easy to read and understand, with clean code and descriptive names
+      - Be deterministic, so that the tests always pass or fail in the same way
+      To help unit test the function above, list diverse scenarios that the function should be able to handle (and under each scenario, include a few examples as sub-bullets).
+  - name: execute_system
+    role: system
+    content: You are a world-class Go developer with an eagle eye for unintended bugs and edge cases. You write careful, accurate unit tests. When asked to reply only with code, you write all of your code in a single block.
+  - name: execute_user
+    role: user
+    content: Using Go and the `github.com/stretchr/testify` package, write a suite of unit tests for the function, following the cases above. Include helpful comments to explain each line. Reply only with code
+steps:
+# Step 1: Generate an explanation of the function
+- name: explain_code
+  messages:
+    - name: explain_system
+    - name: explain_user
+  result_as:
+    role: assistant
+    name: explain_assistant
+# Step 2: Generate a plan to write a unit test
+- name: generate_plan
+  messages:
+    - name: explain_system
+    - name: explain_user
+    - name: explain_assistant
+    - name: plan_user
+  result_as:
+    role: assistant
+    name: plan_assistant
+# Step 3: Generate the unit test
+- name: write_test
+  messages:
+    - name: execute_system
+    - name: explain_user
+    - name: explain_assistant
+    - name: plan_user
+    - name: plan_assistant
+    - name: execute_user
