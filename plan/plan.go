@@ -1,12 +1,11 @@
 package plan
 
 import (
-	"bytes"
 	"fmt"
+
 	"github.com/chain710/dev_agent/util"
 	"github.com/go-playground/validator/v10"
 	"github.com/sashabaranov/go-openai"
-	"text/template"
 )
 
 type Plan struct {
@@ -80,23 +79,16 @@ func (p *Plan) Validate() error {
 	return nil
 }
 
-func (s *Step) ToMessage(arg any) (messages []openai.ChatCompletionMessage, err error) {
-	tpl := template.New(s.Name)
-	for _, message := range s.Messages {
-		_ = message.Name // TODO
-		_, err = tpl.Parse( /*message.Content*/ "")
-		if err != nil {
-			return nil, err
+func (s *Step) ToMessage(provider *messageProvider) (messages []openai.ChatCompletionMessage, err error) {
+	for _, ref := range s.Messages {
+		message, ok := provider.Get(ref.Name)
+		if !ok {
+			return nil, fmt.Errorf("message `%s` not found", ref.Name)
 		}
 
-		var buf bytes.Buffer
-		err = tpl.Execute(&buf, arg)
-		if err != nil {
-			return nil, err
-		}
 		messages = append(messages, openai.ChatCompletionMessage{
-			// Role:    message.Role,
-			Content: buf.String(),
+			Role:    message.Role,
+			Content: message.Content,
 		})
 	}
 	return
