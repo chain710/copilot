@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/chain710/dev_agent/log"
 	"github.com/chain710/dev_agent/plan"
 	"github.com/chain710/dev_agent/util"
 	"github.com/sashabaranov/go-openai"
@@ -11,11 +10,17 @@ import (
 )
 
 var (
-	// testingCmd is an assistant that writes tests for you
-	testingCmd = &cobra.Command{
-		Use:   "testing <plan>",
-		Short: "An assistant that writes tests for you",
+	// executeCmd executes a multi step prompt plan
+	executeCmd = &cobra.Command{
+		Use:   "execute <plan>",
+		Short: "Execute a multi step prompt plan",
 		Args:  cobra.ExactArgs(1),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			util.BindRequiredFlags(cmd,
+				flagNameAzureOpenAIKey,
+				flagNameAzureOpenAIEndpoint,
+				flagNameAzureOpenAIModel)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			planPath := args[0]
 			testingPlan, err := plan.New(plan.FromFile(planPath))
@@ -61,21 +66,17 @@ func Execute(ctx context.Context, p *Plan, data any, model string, client *opena
 `
 			result, err := plan.Execute(cmd.Context(), testingPlan, data, model, client)
 			if err != nil {
-				fmt.Println(err)
+				log.Errorf("error executing plan: %v", err)
 				return err
 			}
 
-			fmt.Println("Result:\n", result.Content)
-
+			cmd.Println("Result:\n")
+			cmd.Println(result.Content)
 			return nil
 		},
 	}
 )
 
 func init() {
-	util.BindRequiredFlags(testingCmd,
-		flagNameAzureOpenAIKey,
-		flagNameAzureOpenAIEndpoint,
-		flagNameAzureOpenAIModel)
-	rootCmd.AddCommand(testingCmd)
+	rootCmd.AddCommand(executeCmd)
 }

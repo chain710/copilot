@@ -3,12 +3,13 @@ package plan
 import (
 	"context"
 	"fmt"
+	"github.com/chain710/dev_agent/log"
 
 	"github.com/sashabaranov/go-openai"
 )
 
 func Execute(ctx context.Context, p *Plan, data any, model string, client *openai.Client) (*Result, error) {
-	provider, err := newMessageProvider(p.Messages, data)
+	provider, err := newPromptProvider(p.Messages, data)
 	if err != nil {
 		return nil, err
 	}
@@ -21,7 +22,11 @@ func Execute(ctx context.Context, p *Plan, data any, model string, client *opena
 			return nil, err
 		}
 
-		fmt.Printf("executing step %s\nmessages: %+v\n", step.Name, messages)
+		log.Infof("executing step %s", step.Name)
+		l := log.With("step", step.Name)
+		for j := range messages {
+			l.Debugw("prompt", "index", j, "message", messages)
+		}
 		resp, err := client.CreateChatCompletion(
 			ctx,
 			openai.ChatCompletionRequest{
@@ -50,8 +55,7 @@ func Execute(ctx context.Context, p *Plan, data any, model string, client *opena
 		}
 
 		for _, choice := range resp.Choices {
-			fmt.Println("----")
-			fmt.Printf("step %s:%d finish reason: %s\n", step.Name, choice.Index, choice.FinishReason)
+			log.Debugf("choice[%d] finish reason: %s, message: %s", choice.Index, choice.FinishReason, choice.Message)
 		}
 
 		if lastStep {

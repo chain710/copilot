@@ -1,13 +1,16 @@
 package main
 
 import (
+	"github.com/chain710/dev_agent/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"os"
 )
 
 var (
 	configFile string
+	logLevel   = zapLogLevel{value: zap.InfoLevel}
 )
 
 func initViper() {
@@ -21,19 +24,14 @@ func initViper() {
 		viper.SetConfigType("yaml")
 	}
 	viper.AutomaticEnv()
-	_ = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 
-	//logLevel := zapcore.ErrorLevel
-	//_ = logLevel.Set(viper.GetString("logLevel"))
-	//bld := log.DefaultBuilder()
-	//bld.Config.Level = logLevel
-	//log.InitLog(bld)
-	//
-	//if err != nil {
-	//	log.Errorf("viper config error %s", err)
-	//} else {
-	//	log.Debugf("viper config used: %s", viper.ConfigFileUsed())
-	//}
+	log.SetLogLevel(logLevel.value)
+	if err != nil {
+		log.Errorf("viper config error %s", err)
+	} else {
+		log.Debugf("viper config used: %s", viper.ConfigFileUsed())
+	}
 }
 
 var rootCmd = &cobra.Command{
@@ -43,7 +41,9 @@ var rootCmd = &cobra.Command{
 
 func Execute() int {
 	cobra.OnInitialize(initViper)
+	defer log.Sync()
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default $HOME/.dev-agent)")
+	rootCmd.PersistentFlags().VarP(&logLevel, "log-level", "L", "log level")
 	rootCmd.PersistentFlags().StringP(flagNameAzureOpenAIKey, "", "", "Azure OpenAI Key")
 	rootCmd.PersistentFlags().StringP(flagNameAzureOpenAIEndpoint, "", "", "Azure OpenAI Endpoint")
 	rootCmd.PersistentFlags().StringP(flagNameAzureOpenAIModel, "", "", "Azure OpenAI Model")

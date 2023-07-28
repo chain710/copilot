@@ -79,7 +79,7 @@ func (p *Plan) Validate() error {
 	return nil
 }
 
-func (s *Step) ToMessage(provider *messageProvider) (messages []openai.ChatCompletionMessage, err error) {
+func (s *Step) ToMessage(provider *promptProvider) (messages []openai.ChatCompletionMessage, err error) {
 	for _, ref := range s.Messages {
 		message, ok := provider.Get(ref.Name)
 		if !ok {
