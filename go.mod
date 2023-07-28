@@ -3,6 +3,7 @@ module github.com/chain710/dev_agent
 go 1.20
 
 require (
+	github.com/go-playground/validator/v10 v10.14.1
 	github.com/sashabaranov/go-openai v1.14.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
@@ -16,7 +17,6 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.14.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
