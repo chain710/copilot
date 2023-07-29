@@ -7,9 +7,25 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
+	"text/template"
 )
 
+func mustReadFile(path string) string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(data)
+}
+
 var (
+	planArguments     PlanArguments
+	templateFunctions = template.FuncMap{
+		"ReadFile": mustReadFile,
+	}
+
 	// executeCmd executes a multi step prompt plan
 	executeCmd = &cobra.Command{
 		Use:   "execute <plan>",
@@ -32,39 +48,13 @@ var (
 			model := viper.GetString(flagNameAzureOpenAIModel)
 			config := openai.DefaultAzureConfig(key, endpoint)
 			client := openai.NewClientWithConfig(config)
-			var data struct {
-				CodeContent string
+			templateArgs, err := planArguments.AssignList.Evaluate(templateFunctions)
+			if err != nil {
+				log.Errorf("error evaluating template arguments: %v", err)
+				return err
 			}
 
-			data.CodeContent = `
-func Execute(ctx context.Context, p *Plan, data any, model string, client *openai.Client) (*Result, error) {
-	for _, step := range p.Steps {
-		fmt.Printf("executing step %s\n", step.Name)
-		messages, err := step.ToMessage(data)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := client.CreateChatCompletion(
-			ctx,
-			openai.ChatCompletionRequest{
-				Model:    model,
-				Messages: messages,
-			},
-		)
-
-		if err != nil {
-			return nil, fmt.Errorf("error executing step %s: %w", step.Name, err)
-		}
-
-		for _, choice := range resp.Choices {
-			fmt.Println(choice.Message)
-		}
-	}
-
-	return nil, nil
-}
-`
-			result, err := plan.Execute(cmd.Context(), testingPlan, data, model, client)
+			result, err := plan.Execute(cmd.Context(), testingPlan, templateArgs, model, client)
 			if err != nil {
 				log.Errorf("error executing plan: %v", err)
 				return err
@@ -78,5 +68,6 @@ func Execute(ctx context.Context, p *Plan, data any, model string, client *opena
 )
 
 func init() {
+	executeCmd.Flags().VarP(&planArguments, "plan-args", "p", "plan arguments. example: 'Content=ReadFile(`source.go`) Function=`GetPriority`'")
 	rootCmd.AddCommand(executeCmd)
 }

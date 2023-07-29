@@ -1,0 +1,52 @@
+{package args}
+
+// first line as entrypoint
+AssignStatements = a1:AssignStatement _ a2:AssignStatement* EOF {
+    return newAssignStatementList(a1, a2), nil
+}
+
+AssignStatement = v:Variable _ "=" _ e:Expression  {
+    return newAssignStatement(v, e), nil
+}
+
+Identifier "identifier" = i:[a-zA-Z]+[a-zA-Z0-9]* {
+    return string(c.text), nil
+}
+
+SingleQuotedString "single-quoted-string" = '"' [^"]* '"' {
+    return newQuotedString(c.text)
+}
+DoubleQuotedString "double-quoted-string" = "'" [^']* "'" {
+    return newQuotedString(c.text)
+}
+BackQuotedString "back-quoted-string" = "`" [^`]* "`" {
+    return newQuotedString(c.text)
+}
+
+String "string" = SingleQuotedString / DoubleQuotedString / BackQuotedString
+
+_ "whitespace" = [ \t]*
+Variable "variable" = i:Identifier {
+    return simpleVariable(i.(string)), nil
+}
+Expression "expression" = e:(FuncExpression / Variable / String) {
+    return newExpression(e)
+}
+
+ExpressionWithComma "expression-with-comma" = "," _ e:Expression {
+    return e.(Expression), nil
+}
+
+MultiExpression = e1:Expression _ e2:ExpressionWithComma* {
+    return newMultiExpression(e1, e2)
+}
+
+Expressions "expressions" = e:(MultiExpression / _) {
+    return newExpressionList(e), nil
+}
+
+FuncExpression "func-expression" = f:Identifier _ "(" _ e:Expressions _ ")" {
+    return functionExpression{function: f.(string), args: e.([]Expression)}, nil
+}
+
+EOF "eof" = !.

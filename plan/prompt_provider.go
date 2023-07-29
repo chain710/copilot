@@ -10,7 +10,7 @@ func newPromptProvider(tplMessages []Message, data any) (*promptProvider, error)
 		messages: make(map[string]*Message),
 	}
 	for _, m := range tplMessages {
-		tpl, err := template.New(m.Name).Parse(m.Content)
+		tpl, err := template.New(m.Name).Option("missingkey=error").Parse(m.Content)
 		if err != nil {
 			return nil, err
 		}

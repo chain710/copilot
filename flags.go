@@ -1,6 +1,9 @@
 package main
 
-import "go.uber.org/zap/zapcore"
+import (
+	"github.com/chain710/dev_agent/args"
+	"go.uber.org/zap/zapcore"
+)
 
 const (
 	flagNameAzureOpenAIKey      = "azure-openai-key"
@@ -27,5 +30,27 @@ func (l *zapLogLevel) Set(s string) error {
 }
 
 func (l *zapLogLevel) Type() string {
+	return "string"
+}
+
+type PlanArguments struct {
+	AssignList args.AssignStatementList
+}
+
+func (p *PlanArguments) String() string {
+	return p.AssignList.String()
+}
+
+func (p *PlanArguments) Set(s string) error {
+	list, err := args.ParseAssignStatementList(s)
+	if err != nil {
+		return err
+	}
+
+	p.AssignList = list
+	return nil
+}
+
+func (p *PlanArguments) Type() string {
 	return "string"
 }

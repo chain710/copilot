@@ -8,7 +8,7 @@ messages:
   - name: explain_user
     role: user
     content: |
-      Please explain the following Go function. Review what each element of the function is doing precisely and what the author's intentions may have been. Organize your explanation as a markdown-formatted, bulleted list.
+      Please explain the following Go function `{{ .FunctionName }}`. Review what each element of the function is doing precisely and what the author's intentions may have been. Organize your explanation as a markdown-formatted, bulleted list.
 
       ```go
       {{ .CodeContent }}
@@ -19,7 +19,6 @@ messages:
       A good unit test suite should aim to:
       - Test the function's behavior for a wide range of possible inputs
       - Test edge cases that the author may not have foreseen
-      - Use table driven test style to make the tests easy to write and maintain
       - Be easy to read and understand, with clean code and descriptive names
       - Be deterministic, so that the tests always pass or fail in the same way
       To help unit test the function above, list diverse scenarios that the function should be able to handle (and under each scenario, include a few examples as sub-bullets).
@@ -28,7 +27,32 @@ messages:
     content: You are a world-class Go developer with an eagle eye for unintended bugs and edge cases. You write careful, accurate unit tests. When asked to reply only with code, you write all of your code in a single block.
   - name: execute_user
     role: user
-    content: Using Go and the `github.com/stretchr/testify` package, write a suite of unit tests for the function, following the cases above. Include helpful comments to explain each line. Reply only with code
+    content: |
+      Using Go and the `github.com/stretchr/testify` package, write a suite of unit tests for the function, following the cases above. 
+      When writing unit test, you should imitate the following style of `TestAdd` shown below:
+      ```
+      func Add(a, b int) int {
+        return a + b
+      }
+      
+      func TestAdd(t *testing.T) {
+        tests := []struct {
+          name   string
+          a, b   int
+          expect int
+        }{
+          {name: "1+2=3", a: 1, b: 2, expect: 3},
+        }
+      
+        for _, tt := range tests {
+          t.Run(tt.name, func(t *testing.T) {
+          require.Equal(t, tt.expect, Add(tt.a, tt.b))
+        })
+        }
+      }
+      ```
+      
+      Include helpful comments to explain each line. Reply only with code.
 steps:
 # Step 1: Generate an explanation of the function
 - name: explain_code
