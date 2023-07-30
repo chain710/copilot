@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"github.com/chain710/copilot/executor"
 	"github.com/chain710/copilot/log"
 	"github.com/chain710/copilot/plan"
 	"github.com/chain710/copilot/util"
 	"github.com/sashabaranov/go-openai"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
 	"text/template"
+	"time"
 )
 
 func mustReadFile(path string) string {
@@ -22,6 +27,7 @@ func mustReadFile(path string) string {
 
 var (
 	planArguments     PlanArguments
+	printEveryStep    bool
 	templateFunctions = template.FuncMap{
 		"ReadFile": mustReadFile,
 	}
@@ -54,20 +60,56 @@ var (
 				return err
 			}
 
-			result, err := plan.Execute(cmd.Context(), testingPlan, templateArgs, model, client)
+			bar := progressbar.NewOptions(-1,
+				progressbar.OptionSetItsString("step"),
+				progressbar.OptionSpinnerType(11),
+				progressbar.OptionClearOnFinish())
+			defer bar.Close()
+			bgIncrementProgress(cmd.Context(), bar)
+
+			exec := executor.NewExecutor(client, model)
+			totalSteps := len(testingPlan.Steps)
+			currentStep := 0
+			_, err = exec.Do(cmd.Context(), testingPlan,
+				executor.PlanData(templateArgs),
+				executor.BeforeCallback(func(step *plan.Step, last bool) any {
+					currentStep++
+					bar.Describe(fmt.Sprintf("%d/%d %s", currentStep, totalSteps, step.Name))
+					return nil
+				}),
+				executor.AfterCallback(func(step *plan.Step, last bool, beforeData any, content string) {
+					if last || printEveryStep {
+						_ = bar.Clear()
+						cmd.Printf("Step[%s] Result:\n", step.Name)
+						cmd.Println(content)
+					}
+				}))
 			if err != nil {
 				log.Errorf("error executing plan: %v", err)
 				return err
 			}
 
-			cmd.Println("Result:")
-			cmd.Println(result.Content)
 			return nil
 		},
 	}
 )
 
+func bgIncrementProgress(ctx context.Context, bar *progressbar.ProgressBar) {
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				_ = bar.Add(1)
+				time.Sleep(time.Millisecond * 200)
+			}
+		}
+	}()
+}
+
 func init() {
 	executeCmd.Flags().VarP(&planArguments, "plan-args", "p", "plan arguments. example: 'Content=ReadFile(`source.go`) Function=`GetPriority`'")
+	executeCmd.Flags().BoolVar(&printEveryStep, "print-every-step", false, "print every step's result")
 	rootCmd.AddCommand(executeCmd)
 }

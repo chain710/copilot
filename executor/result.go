@@ -1,4 +1,4 @@
-package plan
+package executor
 
 type Result struct {
 	Content  string

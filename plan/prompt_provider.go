@@ -5,8 +5,8 @@ import (
 	"text/template"
 )
 
-func newPromptProvider(tplMessages []Message, data any) (*promptProvider, error) {
-	provider := promptProvider{
+func NewPromptProvider(tplMessages []Message, data any) (*PromptProvider, error) {
+	provider := PromptProvider{
 		messages: make(map[string]*Message),
 	}
 	for _, m := range tplMessages {
@@ -29,15 +29,15 @@ func newPromptProvider(tplMessages []Message, data any) (*promptProvider, error)
 	return &provider, nil
 }
 
-type promptProvider struct {
+type PromptProvider struct {
 	messages map[string]*Message // name => message mapping
 }
 
-func (p *promptProvider) Get(name string) (*Message, bool) {
+func (p *PromptProvider) Get(name string) (*Message, bool) {
 	value, ok := p.messages[name]
 	return value, ok
 }
 
-func (p *promptProvider) Add(name string, value *Message) {
+func (p *PromptProvider) Add(name string, value *Message) {
 	p.messages[name] = value
 }
