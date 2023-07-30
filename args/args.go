@@ -154,12 +154,3 @@ func newAssignStatementList(a1, a2 any) AssignStatementList {
 	}
 	return result
 }
-
-func DupStringList(a []string) []*string {
-	var result []*string
-	for _, s := range a {
-		result = append(result, &s)
-	}
-
-	return result
-}
