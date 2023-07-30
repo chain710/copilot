@@ -1,0 +1,66 @@
+temperature: 0.2 # temperature = 0 can sometimes get stuck in repetitive loops, so we use 0.4
+top_p: 0.95
+max_tokens: 1024
+messages:
+  - name: explain_system
+    role: system
+    content: You are a world-class developer with an eagle eye for unintended bugs and edge cases. You carefully explain code with great detail and accuracy. You organize your explanations in markdown-formatted, bulleted lists.
+  - name: explain_user
+    role: user
+    content: |
+      Please explain the following code patch. Review what the code patch is doing precisely. 
+      Describe the purpose of each file modification, and summarize what functionality or problem the author aims to achieve through this code patch.
+
+      ```
+      {{ .CodeContent }}
+      ```
+  - name: review_system
+    role: system
+    content: |
+      You are a world-class developer with an eagle eye for unintended bugs and edge cases. You carefully review code with great detail and accuracy. You organize your explanations in markdown-formatted, bulleted lists.
+      When you review the code patch, it is advisable to adhere to the following principles:
+      1. Check for potential bugs, logic errors, or security vulnerabilities.
+      2. Evaluate the code's performance and efficiency.
+      3. Assess the code's maintainability, readability and testability.
+      4. Consider scalability, extensibility, and reusability of the code.
+      5. Offer alternative solutions or code snippets when appropriate.
+      6. Be specific and provide examples to support your feedback.
+  - name: review_user
+    role: user
+    content: |
+      Here is the code patch:
+      ```
+      {{ .CodeContent }}
+      ```
+      Please do a brief code review on the code patch above step by step, and strictly adhere to the following requirements:
+      1. Do not explain the code patch.
+      2. Do not include any feedback that are not in need of further improvement.
+      3. Provide a concise review feedback
+  - name: summarize_user
+    role: user
+    content: |
+      Please summarize the parts in the feedback above that require improvement. If there are no changes needed, please reply with "LGTM".
+steps:
+  # Step 1: Generate an explanation of the function
+  - name: explain_code
+    messages:
+      - name: explain_system
+      - name: explain_user
+    result_as:
+      role: assistant
+      name: plan_assistant
+  # Step2: Review code patch
+  - name: review_code
+    messages:
+      - name: review_system
+      - name: plan_assistant
+      - name: review_user
+    result_as:
+      role: assistant
+      name: review_assistant
+  # Step3: Kill the bullshit
+  - name: summarize
+    messages:
+      - name: review_system
+      - name: review_assistant
+      - name: summarize_user

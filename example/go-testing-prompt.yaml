@@ -51,7 +51,7 @@ messages:
         }
       }
       ```
-      
+      {{ .MorePrompt }}
       Include helpful comments to explain each line. Reply only with code.
 steps:
 # Step 1: Generate an explanation of the function
