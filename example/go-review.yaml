@@ -34,12 +34,12 @@ messages:
       ```
       Please do a brief code review on the code patch above step by step, and strictly adhere to the following requirements:
       1. Do not explain the code patch.
-      2. Do not include any feedback that are not in need of further improvement.
-      3. Provide a concise review feedback
+      2. Only provide feedback that are in need of further improvement.
   - name: summarize_user
     role: user
     content: |
-      Please summarize the parts in the feedback above that require improvement. If there are no changes needed, please reply with "LGTM".
+      Please summarize the parts in the feedback above that require improvement, keep the improvement example. 
+      If there are no changes needed, please reply with "LGTM".
 steps:
   # Step 1: Generate an explanation of the function
   - name: explain_code
