@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/chain710/dev_agent/log"
+	"github.com/chain710/copilot/log"
 	"strings"
 	"text/template"
 )

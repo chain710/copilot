@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/chain710/dev_agent/log"
-	"github.com/chain710/dev_agent/plan"
-	"github.com/chain710/dev_agent/util"
+	"github.com/chain710/copilot/log"
+	"github.com/chain710/copilot/plan"
+	"github.com/chain710/copilot/util"
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -60,7 +60,7 @@ var (
 				return err
 			}
 
-			cmd.Println("Result:\n")
+			cmd.Println("Result:")
 			cmd.Println(result.Content)
 			return nil
 		},

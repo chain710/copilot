@@ -3,7 +3,7 @@ package plan
 import (
 	"context"
 	"fmt"
-	"github.com/chain710/dev_agent/log"
+	"github.com/chain710/copilot/log"
 
 	"github.com/sashabaranov/go-openai"
 )

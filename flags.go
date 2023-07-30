@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/chain710/dev_agent/args"
+	"github.com/chain710/copilot/args"
 	"go.uber.org/zap/zapcore"
 )
 

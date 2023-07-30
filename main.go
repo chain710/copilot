@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/chain710/dev_agent/log"
+	"github.com/chain710/copilot/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"

@@ -1,4 +1,4 @@
-module github.com/chain710/dev_agent
+module github.com/chain710/copilot
 
 go 1.20
 

@@ -3,7 +3,7 @@ package plan
 import (
 	"fmt"
 
-	"github.com/chain710/dev_agent/util"
+	"github.com/chain710/copilot/util"
 	"github.com/go-playground/validator/v10"
 	"github.com/sashabaranov/go-openai"
 )
