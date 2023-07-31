@@ -20,7 +20,7 @@ func initViper() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".dev-agent")
+		viper.SetConfigName(".copilot")
 		viper.SetConfigType("yaml")
 	}
 	viper.AutomaticEnv()
@@ -35,14 +35,14 @@ func initViper() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "dev-agent",
+	Use:   "copilot",
 	Short: "AI Agent for developer",
 }
 
 func Execute() int {
 	cobra.OnInitialize(initViper)
 	defer log.Sync()
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default $HOME/.dev-agent)")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default $HOME/.copilot)")
 	rootCmd.PersistentFlags().VarP(&logLevel, "log-level", "L", "log level")
 	rootCmd.PersistentFlags().StringP(flagNameAzureOpenAIKey, "", "", "Azure OpenAI Key")
 	rootCmd.PersistentFlags().StringP(flagNameAzureOpenAIEndpoint, "", "", "Azure OpenAI Endpoint")
