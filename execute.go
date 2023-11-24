@@ -11,10 +11,19 @@ import (
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io"
 	"os"
 	"text/template"
 	"time"
 )
+
+func mustReadStdin() string {
+	data, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
+}
 
 func mustReadFile(path string) string {
 	data, err := os.ReadFile(path)
@@ -30,6 +39,7 @@ var (
 	printEveryStep    bool
 	templateFunctions = template.FuncMap{
 		"ReadFile": mustReadFile,
+		"Stdin":    mustReadStdin,
 	}
 
 	// executeCmd executes a multi step prompt plan
