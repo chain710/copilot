@@ -21,6 +21,7 @@ type ResultAs struct {
 }
 
 type Step struct {
+	Model    string       `yaml:"model"`
 	Name     string       `yaml:"name"`
 	Messages []MessageRef `yaml:"messages"`
 	ResultAs *ResultAs    `yaml:"result_as,omitempty"`

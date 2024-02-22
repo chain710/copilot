@@ -54,7 +54,7 @@ func (e executor) Do(ctx context.Context, p *plan.Plan, options ...Option) (*Res
 		resp, err := e.client.CreateChatCompletion(
 			ctx,
 			openai.ChatCompletionRequest{
-				Model:       e.model,
+				Model:       step.Model,
 				Messages:    messages,
 				Temperature: p.Temperature,
 				MaxTokens:   p.MaxTokens,

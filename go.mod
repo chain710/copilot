@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-playground/validator/v10 v10.14.1
-	github.com/sashabaranov/go-openai v1.14.1
+	github.com/sashabaranov/go-openai v1.19.4
 	github.com/schollz/progressbar/v3 v3.13.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
